@@ -13,7 +13,18 @@
   }
   let userList = getUsers()
   let totalCount:number;
+
+  function debounce(func, timeout = 500){
+  let timer;
+  console.log("debounce")
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => { func.apply(this, args); }, timeout);
+  };
+}
+
   const handleSearch = async e => {
+    console.log("test");
     try {
       const res = await axios(`https://api.github.com/search/users?q=${e.detail}`)
       console.log(res.data)
@@ -30,6 +41,8 @@
     detailedView = true
   }
 
+  const processChanges = debounce(e => handleSearch(e))
+
 </script>
 
 <main class="w-screen min-h-screen bg-slate-700 flex flex-col items-center">
@@ -37,7 +50,7 @@
   {#await userList}
     <p>Waiting...</p>
   {:then userList}
-  <Searchbar on:target-change={handleSearch} />
+  <Searchbar on:target-change={processChanges} />
   <h1 class="text-xl font-semibold text-white">{searchCount} Total Results</h1>
   <UserList on:detailed-view={enterDetailedView} {userList} />
   {:catch}
